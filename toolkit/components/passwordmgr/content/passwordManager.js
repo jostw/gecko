@@ -5,6 +5,25 @@
 /*** =================== SAVED SIGNONS CODE =================== ***/
 
 Cu.import("resource://gre/modules/AppConstants.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
+XPCOMUtils.defineLazyModuleGetter(this, "PlacesUtils",
+                                  "resource://gre/modules/PlacesUtils.jsm");
+
+XPCOMUtils.defineLazyModuleGetter(this, "DeferredTask",
+                                  "resource://gre/modules/DeferredTask.jsm");
+
+XPCOMUtils.defineLazyGetter(this, "faviconStyleSheet", function() {
+  for (let i = document.styleSheets.length - 1; i >= 0; i--) {
+    let sheet = document.styleSheets[i];
+
+    if (sheet.href === "data:text/css,") {
+      return sheet;
+    }
+  }
+
+  return undefined;
+});
 
 var kSignonBundle;
 var showingPasswords = false;
@@ -44,7 +63,14 @@ function setFilter(aFilterString) {
 }
 
 var signonsTreeView = {
+  // Keep track of which favicons we've appended to the favicon stylesheet.
+  _faviconSet: new Set(),
   _filterSet : [],
+  // Coalesce invalidations to avoid repeated flickering.
+  _invalidateTask: new DeferredTask(function() {
+    signonsTree.treeBoxObject.invalidate();
+    signonsTree.treeBoxObject.clearStyleAndImageCaches();
+  }, 10),
   _lastSelectedRanges : [],
   selection: null,
 
@@ -93,10 +119,31 @@ var signonsTreeView = {
   getRowProperties : function(row) { return ""; },
   getColumnProperties : function(column) { return ""; },
   getCellProperties : function(row,column) {
-    if (column.element.getAttribute("id") == "siteCol")
-      return "ltr";
+    if (column.element.getAttribute("id") !== "siteCol") {
+      return "";
+    }
 
-    return "";
+    const signon = this._filterSet.length ? this._filterSet[row] : signons[row];
+    const props = "ltr " + signon.hostname;
+
+    if (this._faviconSet.has(signon.hostname)) {
+      return props;
+    }
+
+    this._faviconSet.add(signon.hostname);
+
+    PlacesUtils.promiseFaviconLinkUrl(signon.hostname)
+      .then(favicon => {
+        faviconStyleSheet.insertRule(`
+          treechildren::-moz-tree-image(${CSS.escape(signon.hostname)}) {
+            list-style-image: url("moz-anno:${favicon.path}");
+          }
+        `, faviconStyleSheet.cssRules.length);
+
+        this._invalidateTask.arm();
+      }).catch(Cu.reportError);
+
+    return props;
   },
   setCellText : function(row, col, value) {
     // If there is a filter, _filterSet needs to be used, otherwise signons is used.
