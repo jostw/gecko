@@ -601,7 +601,7 @@ var NodeActor = exports.NodeActor = protocol.ActorClassWithSpec(nodeSpec, {
    * Set the node's value to a given string.
    */
   setNodeValue: function (value) {
-    this.rawNode.nodeValue = value;
+    this.rawNode.nodeValue = value.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
   },
 
   /**

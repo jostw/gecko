@@ -2622,7 +2622,7 @@ TextEditor.prototype = {
       if (this.node.incompleteValue) {
         text += ELLIPSIS;
       }
-      this.value.textContent = text;
+      this.value.textContent = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     } else {
       let longstr = null;
       this.node.getNodeValue().then(ret => {
