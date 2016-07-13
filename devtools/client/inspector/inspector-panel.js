@@ -10,6 +10,7 @@ var Services = require("Services");
 var promise = require("promise");
 var defer = require("devtools/shared/defer");
 var EventEmitter = require("devtools/shared/event-emitter");
+const events = require("sdk/event/core");
 const {executeSoon} = require("devtools/shared/DevToolsUtils");
 var {KeyShortcuts} = require("devtools/client/shared/key-shortcuts");
 var {Task} = require("devtools/shared/task");
@@ -96,6 +97,8 @@ function InspectorPanel(iframeWindow, toolbox) {
   this.onBeforeNewSelection = this.onBeforeNewSelection.bind(this);
   this.onDetached = this.onDetached.bind(this);
   this.onPaneToggleButtonClicked = this.onPaneToggleButtonClicked.bind(this);
+  this.onMeasureToggleButtonClicked = this.onMeasureToggleButtonClicked.bind(this);
+  this.onRulersToggleButtonClicked = this.onRulersToggleButtonClicked.bind(this);
   this._onMarkupFrameLoad = this._onMarkupFrameLoad.bind(this);
 
   this._target.on("will-navigate", this._onBeforeNavigate);
@@ -250,6 +253,8 @@ InspectorPanel.prototype = {
     });
 
     this.setupSearchBox();
+    this.setupRulersToggle();
+    this.setupMeasureToggle();
     this.setupSidebar();
 
     return deferred.promise;
@@ -402,6 +407,92 @@ InspectorPanel.prototype = {
 
   get browserRequire() {
     return this._toolbox.browserRequire;
+  },
+
+  /**
+   * Hooks the rulers toolbar button to toggle rulers highlighter.
+   */
+  setupRulersToggle: function () {
+    this._rulersToggleButton = this.panelDoc.getElementById("inspector-rulers-toggle");
+    this._rulersToggleButton.setAttribute("tooltiptext",
+      strings.GetStringFromName("inspector.rulers"));
+    this._rulersToggleButton.addEventListener("mousedown",
+      this.onRulersToggleButtonClicked);
+  },
+
+  /**
+   * Show/hide the rulers highlighter and check/uncheck the rulers toolbar button.
+   */
+  onRulersToggleButtonClicked: function () {
+    if (this._rulersHighlighter) {
+      this._rulersHighlighter.finalize();
+      this._rulersHighlighter = null;
+
+      this._rulersToggleButton.removeAttribute("checked");
+
+      return;
+    }
+
+    this.toolbox.highlighterUtils.getHighlighterByType("RulersHighlighter")
+      .then(rulersHighligher => {
+        this._rulersHighlighter = rulersHighligher;
+
+        events.once(this._rulersHighlighter, "destroy", () => {
+          if (this._rulersHighlighter) {
+            this._rulersHighlighter.finalize();
+            this._rulersHighlighter = null;
+
+            this._rulersToggleButton.removeAttribute("checked");
+          }
+        });
+
+        this._rulersHighlighter.show(this.selection.nodeFront);
+
+        this._rulersToggleButton.setAttribute("checked", true);
+      });
+  },
+
+  /**
+   * Hooks the measuring tool toolbar button to toggle measuring tool highlighter.
+   */
+  setupMeasureToggle: function () {
+    this._measureToggleButton = this.panelDoc.getElementById("inspector-measure-toggle");
+    this._measureToggleButton.setAttribute("tooltiptext",
+      strings.GetStringFromName("inspector.measure"));
+    this._measureToggleButton.addEventListener("mousedown",
+      this.onMeasureToggleButtonClicked);
+  },
+
+  /**
+   * Show/hide the measuring tool highlighter and check/uncheck the measuring tool toolbar button.
+   */
+  onMeasureToggleButtonClicked: function () {
+    if (this._measuringToolHighlighter) {
+      this._measuringToolHighlighter.finalize();
+      this._measuringToolHighlighter = null;
+
+      this._measureToggleButton.removeAttribute("checked");
+
+      return;
+    }
+
+    this.toolbox.highlighterUtils.getHighlighterByType("MeasuringToolHighlighter")
+      .then(measuringToolHighligher => {
+        this._measuringToolHighlighter = measuringToolHighligher;
+
+        events.once(this._measuringToolHighlighter, "destroy", () => {
+          if (this._measuringToolHighlighter) {
+            this._measuringToolHighlighter.finalize();
+            this._measuringToolHighlighter = null;
+
+            this._measureToggleButton.removeAttribute("checked");
+          }
+        });
+
+        this._measuringToolHighlighter.show(this.selection.nodeFront);
+
+        this._measureToggleButton.setAttribute("checked", true);
+      });
   },
 
   /**

@@ -136,6 +136,18 @@
   right: 0;
 }
 
+/* Rulers toolbar button */
+
+#inspector-rulers-toggle::before {
+  background-image: var(--theme-rulers-image);
+}
+
+/* Measuring tool toolbar button */
+
+#inspector-measure-toggle::before {
+  background-image: var(--theme-measure-image);
+}
+
 /* Override `-moz-user-focus:ignore;` from toolkit/content/minimal-xul.css */
 .inspector-tabpanel > * {
   -moz-user-focus: normal;

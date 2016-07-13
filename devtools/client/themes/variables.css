@@ -176,6 +176,8 @@
   --theme-graphs-full-blue: #00f;
 
   /* Images */
+  --theme-rulers-image: url(chrome://devtools/skin/images/firebug/command-rulers.svg);
+  --theme-measure-image: url(chrome://devtools/skin/images/firebug/command-measure.svg);
   --theme-pane-collapse-image: url(chrome://devtools/skin/images/firebug/pane-collapse.svg);
   --theme-pane-expand-image: url(chrome://devtools/skin/images/firebug/pane-expand.svg);
 
@@ -200,4 +202,8 @@
    * should improve keyboard navigation usability. */
   --theme-focus-outline: 1px dotted var(--theme-focus-outline-color);
   --theme-focus-box-shadow-textbox: 0 0 0 1px var(--theme-textbox-box-shadow);
+
+  /* Images */
+  --theme-rulers-image: url(chrome://devtools/skin/images/command-rulers.svg);
+  --theme-measure-image: url(chrome://devtools/skin/images/command-measure.svg);
 }

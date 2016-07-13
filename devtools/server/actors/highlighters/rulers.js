@@ -246,6 +246,7 @@ RulersHighlighter.prototype = {
       this._rafID = 0;
     }
   },
+
   updateViewport: function () {
     let { devicePixelRatio } = this.env.window;
 

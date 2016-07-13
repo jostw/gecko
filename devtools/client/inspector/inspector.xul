@@ -48,6 +48,10 @@
         <html:button id="inspector-eyedropper-toggle"
                      title="&inspectorEyeDropper.label;"
                      class="devtools-button command-button-invertable" />
+        <div id="inspector-rulers-toggle"
+             class="devtools-button" />
+        <div id="inspector-measure-toggle"
+             class="devtools-button" />
         <div xmlns="http://www.w3.org/1999/xhtml"
           id="inspector-sidebar-toggle-box" />
       </html:div>
