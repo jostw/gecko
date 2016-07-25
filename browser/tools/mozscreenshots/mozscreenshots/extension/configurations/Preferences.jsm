@@ -51,6 +51,17 @@ this.Preferences = {
         });
       }),
     },
+
+    "paneAdvanced-certManagerDialog": {
+      applyConfig: Task.async(function*() {
+        let browserWindow = Services.wm.getMostRecentWindow("navigator:browser");
+        yield prefHelper("paneAdvanced", "encryptionTab");
+
+        yield ContentTask.spawn(browserWindow.gBrowser.selectedBrowser, null, function* () {
+          content.document.getElementById("viewCertificatesButton").click();
+        });
+      }),
+    }
   },
 };
 
