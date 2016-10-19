@@ -49,8 +49,8 @@ function register_module(categoryName, categoryObject) {
   });
 }
 
-addEventListener("DOMContentLoaded", function onLoad() {
-  removeEventListener("DOMContentLoaded", onLoad);
+document.addEventListener("DOMContentLoaded", function onLoad() {
+  document.removeEventListener("DOMContentLoaded", onLoad);
   init_all();
 });
 
